@@ -1,0 +1,115 @@
+services:
+  invoices_api:
+    #restart: unless-stopped
+    container_name: jumbo_invoices_api
+    image: node:lts
+    # ports:
+    #   - 3010:3000
+    volumes:
+      - ./invoices_api:/usr/src/app
+    working_dir: /usr/src/app
+    env_file:
+      - ./invoices_api/.env
+    #command: npm start
+    command: npm run watch
+    networks:
+      - jumbo
+    depends_on:
+      - invoices_db
+    links:
+      - invoices_db
+
+  auth_api:
+    #restart: unless-stopped
+    container_name: jumbo_auth_api
+    image: node:lts
+    # ports:
+    #   - 3020:3000
+    volumes:
+      - ./auth_api:/usr/src/app
+    working_dir: /usr/src/app
+    env_file:
+      - ./auth_api/.env
+    #command: npm start
+    command: npm run watch
+    networks:
+      - jumbo
+    links:
+      - users_api
+
+  users_api:
+    #restart: unless-stopped
+    container_name: jumbo_users_api
+    image: node:lts
+    # ports:
+    #   - 3040:3000
+    volumes:
+      - ./users_api:/usr/src/app
+    working_dir: /usr/src/app
+    env_file:
+      - ./users_api/.env
+    #command: npm start
+    command: npm run watch
+    networks:
+      - jumbo
+    depends_on:
+      - users_db
+    links:
+      - users_db
+
+  gateway_api:
+    #restart: unless-stopped
+    container_name: jumbo_gateway_api
+    image: node:lts
+    ports:
+      - 3030:3000
+    volumes:
+      - ./gateway_api:/usr/src/app
+    working_dir: /usr/src/app
+    env_file:
+      - ./gateway_api/.env
+    #command: npm start
+    command: npm run watch
+    networks:
+      - jumbo
+    depends_on:
+      - auth_api
+      - invoices_api
+
+  invoices_db:
+    #restart: unless-stopped
+    container_name: jumbo_invoices_db
+    image: mongo
+    env_file:
+     - ./invoices_db/.env
+    volumes:
+      - ./invoices_db_data:/data/db
+    networks:
+      - jumbo
+
+  users_db:
+    #restart: unless-stopped
+    container_name: jumbo_users_db
+    image: mongo
+    env_file:
+     - ./users_db/.env
+    volumes:
+      - ./users_db_data:/data/db
+    networks:
+      - jumbo
+
+  adminer:
+    #restart: unless-stopped
+    container_name: jumbo_adminer
+    image: adminer
+    ports:
+      - 9191:8080
+    depends_on:
+      - users_db
+      - invoices_db
+    networks:
+      - jumbo
+
+networks:
+  jumbo:
+    driver: bridge
