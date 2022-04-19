@@ -1,4 +1,28 @@
 services:
+  gateway_api:
+    #restart: unless-stopped
+    container_name: jumbo_gateway_api
+    image: node:lts
+    ports:
+      - 3030:3000
+    volumes:
+      - ./gateway_api:/usr/src/app
+    working_dir: /usr/src/app
+    env_file:
+      - ./gateway_api/.env
+    #command: npm start
+    command: npm run watch
+    networks:
+      - jumbo
+    links:
+      - auth_api
+      - invoices_api
+      - users_api
+    depends_on:
+      - auth_api
+      - invoices_api
+      - users_api
+
   invoices_api:
     #restart: unless-stopped
     container_name: jumbo_invoices_api
@@ -18,6 +42,17 @@ services:
       - invoices_db
     links:
       - invoices_db
+
+  invoices_db:
+    #restart: unless-stopped
+    container_name: jumbo_invoices_db
+    image: mongo
+    env_file:
+     - ./invoices_db/.env
+    volumes:
+      - ./invoices_db_data:/data/db
+    networks:
+      - jumbo
 
   auth_api:
     #restart: unless-stopped
@@ -57,36 +92,6 @@ services:
     links:
       - users_db
 
-  gateway_api:
-    #restart: unless-stopped
-    container_name: jumbo_gateway_api
-    image: node:lts
-    ports:
-      - 3030:3000
-    volumes:
-      - ./gateway_api:/usr/src/app
-    working_dir: /usr/src/app
-    env_file:
-      - ./gateway_api/.env
-    #command: npm start
-    command: npm run watch
-    networks:
-      - jumbo
-    depends_on:
-      - auth_api
-      - invoices_api
-
-  invoices_db:
-    #restart: unless-stopped
-    container_name: jumbo_invoices_db
-    image: mongo
-    env_file:
-     - ./invoices_db/.env
-    volumes:
-      - ./invoices_db_data:/data/db
-    networks:
-      - jumbo
-
   users_db:
     #restart: unless-stopped
     container_name: jumbo_users_db
@@ -98,14 +103,32 @@ services:
     networks:
       - jumbo
 
-  adminer:
+  mongo_express_users:
     #restart: unless-stopped
-    container_name: jumbo_adminer
-    image: adminer
+    container_name: jumbo_mongo_express_users
+    image: mongo-express
+    env_file:
+     - ./mongo_express_users/.env
     ports:
-      - 9191:8080
+      - 8081:8081
+    links:
+      - users_db
     depends_on:
       - users_db
+    networks:
+      - jumbo
+
+  mongo_express_invoices:
+    #restart: unless-stopped
+    container_name: jumbo_mongo_express_invoices
+    image: mongo-express
+    env_file:
+     - ./mongo_express_invoices/.env
+    ports:
+      - 8082:8081
+    links:
+      - invoices_db
+    depends_on:
       - invoices_db
     networks:
       - jumbo
