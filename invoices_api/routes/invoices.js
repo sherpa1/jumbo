@@ -1,7 +1,11 @@
+"use strict";
+
 const express = require('express');
 const router = express.Router();
 const Invoice = require('../models/Invoice');
 const Customer = require('../models/Customer');
+const { v4: uuidv4 } = require('uuid');
+
 
 router.post('/', async (req, res, next) => {
   try {
@@ -11,11 +15,13 @@ router.post('/', async (req, res, next) => {
     const customer = await Customer.find({ uuid: data.customer });
 
     data.customer = customer._id;
+    data.uuid = uuidv4();
 
     const invoice = new Invoice(data);
     await invoice.save();
     res.status(200).json(invoice);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
@@ -25,6 +31,7 @@ router.get('/:uuid', async (req, res, next) => {
     const invoice = await Invoice.findOne({ uuid: req.params.uuid });
     res.json(invoice);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
@@ -34,6 +41,7 @@ router.get('/', async (req, res, next) => {
     const invoices = await Invoice.find({});
     res.json(invoices);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
@@ -51,6 +59,7 @@ router.put('/:uuid', async (req, res, next) => {
     res.status(200).json(original);
 
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });
@@ -75,6 +84,7 @@ router.patch('/:uuid', async (req, res, next) => {
 
     res.status(200).json(original);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 });

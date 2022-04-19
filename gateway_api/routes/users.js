@@ -1,10 +1,12 @@
+"use strict";
+
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
 const end_point = "http://users_api:3000/users/";
 
-router.get(end_point + ':uuid', async (req, res, next) => {
+router.get('/:uuid', async (req, res, next) => {
 
     try {
         const result = await axios.get(end_point + req.params.uuid);
@@ -37,6 +39,7 @@ router.get('/', async (req, res, next) => {
         }
 
     } catch (error) {
+        //console.error(error);
         if (error.response !== undefined) {
             next(error.response.data);
         } else {
@@ -50,9 +53,19 @@ router.post('/', async (req, res, next) => {
 
     try {
         const result = await axios.post(end_point, req.body);
+
+        const user = result.data;
+
+        await axios.post("http://auth_api:3000/credentials", { user_uuid: user.uuid, password: req.body.password });
+
         res.json(result.data);
     } catch (error) {
-        next(error.response.data);
+        //console.error(error);
+        if (error.response !== undefined) {
+            next(error.response.data);
+        } else {
+            next(error);
+        }
     }
 
 });
@@ -63,7 +76,11 @@ router.put('/:uuid', async (req, res, next) => {
         const result = await axios.put(end_point + req.params.uuid, req.body);
         res.json(result.data);
     } catch (error) {
-        next(error.response.data);
+        if (error.response !== undefined) {
+            next(error.response.data);
+        } else {
+            next(error);
+        }
     }
 
 });
@@ -74,7 +91,11 @@ router.patch('/:uuid', async (req, res, next) => {
         const result = await axios.get(end_point + req.params.uuid, req.body);
         res.json(result.data);
     } catch (error) {
-        next(error.response.data);
+        if (error.response !== undefined) {
+            next(error.response.data);
+        } else {
+            next(error);
+        }
     }
 
 });
@@ -85,7 +106,11 @@ router.delete('/:uuid', async (req, res, next) => {
         const result = await axios.delete(end_point + req.params.uuid);
         res.json(result.data);
     } catch (error) {
-        next(error.response.data);
+        if (error.response !== undefined) {
+            next(error.response.data);
+        } else {
+            next(error);
+        }
     }
 
 });

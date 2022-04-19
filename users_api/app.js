@@ -1,3 +1,5 @@
+"use strict";
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -6,8 +8,6 @@ const helmet = require('helmet');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-
-const hidePassword = require('./middlewares/hidePassword');
 
 const MongoDBConnect = require('./utils/MongoDBConnect');
 

@@ -1,9 +1,15 @@
+"use strict";
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const helmet = require('helmet');
 const authRouter = require('./routes/auth');
+const credentialsRouter = require('./routes/credentials');
+
+const MongoDBConnect = require('./utils/MongoDBConnect');
+
 
 const app = express();
 
@@ -14,6 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use('/auth', authRouter);
+app.use('/credentials', credentialsRouter);
 
 app.use((req, res, next) => {
     res.sendStatus(404);

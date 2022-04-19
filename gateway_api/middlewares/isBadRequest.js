@@ -1,3 +1,5 @@
+"use strict";
+
 const isBadRequest = (req, res, next) => {
     if (req.query) {
         for (const key in req.query) {

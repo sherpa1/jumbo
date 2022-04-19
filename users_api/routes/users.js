@@ -1,8 +1,11 @@
+"use strict";
+
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
-
+const axios = require('axios');
 const User = require('../models/User');
+const { v4: uuidv4 } = require('uuid');
+
 
 const saltRounds = 10;
 
@@ -19,12 +22,12 @@ router.get('/', async (req, res, next) => {
       if (user === null) {
         next();//404
       } else {
-        //res.json(user);
-        next();
+        res.json(user);
       }
     }
 
   } catch (error) {
+    console.error(error);
     next(error);
   }
 
@@ -33,12 +36,13 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
 
   const data = req.body;
+  data.uuid = uuidv4();
 
   try {
-    data.password = await bcrypt.hash(data.password, saltRounds);
-    const admin = new User(data);
-    await admin.save();
-    res.json(admin);
+    const new_user = new User(data);
+    await new_user.save();
+
+    res.json(new_user);
   } catch (error) {
 
     console.error(error);
@@ -52,6 +56,7 @@ router.post('/', async (req, res, next) => {
   }
 
 });
+
 
 router.all("/", (req, res, next) => {
   res.sendStatus(405);//Method Not Allowed

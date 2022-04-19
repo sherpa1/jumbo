@@ -69,7 +69,11 @@ services:
     command: npm run watch
     networks:
       - jumbo
+    depends_on:
+      - users_db
+      - users_api
     links:
+      - users_db
       - users_api
 
   users_api:
@@ -103,6 +107,17 @@ services:
     networks:
       - jumbo
 
+  auth_db:
+    #restart: unless-stopped
+    container_name: jumbo_auth_db
+    image: mongo
+    env_file:
+     - ./auth_db/.env
+    volumes:
+      - ./auth_db_data:/data/db
+    networks:
+      - jumbo
+
   mongo_express_users:
     #restart: unless-stopped
     container_name: jumbo_mongo_express_users
@@ -130,6 +145,21 @@ services:
       - invoices_db
     depends_on:
       - invoices_db
+    networks:
+      - jumbo
+
+  mongo_express_auth:
+    #restart: unless-stopped
+    container_name: jumbo_mongo_express_auth
+    image: mongo-express
+    env_file:
+     - ./mongo_express_auth/.env
+    ports:
+      - 8083:8081
+    links:
+      - auth_db
+    depends_on:
+      - auth_db
     networks:
       - jumbo
 
